@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def is_float(element: any) -> bool:
-#If you expect None to be passed:
     if element is None: 
         return False
     try:
@@ -53,6 +52,8 @@ class App:
         self.botaoAddLinha.grid(row=0, column=3, padx=5)
 
         self.tabela.bind('<Double-1>', self.editarCelula)
+        self.tabela.bind('<KeyPress-BackSpace>', self.deletarLinha)
+        self.tabela.bind('<KeyPress-Delete>', self.deletarLinha)
 
     def addLinha(self):
         self.tabela.insert('', 'end', values=(0, 0))
@@ -86,9 +87,17 @@ class App:
             editorCelula.destroy()
 
         editorCelula.bind('<Return>', salvar)
+        editorCelula.bind('<KeyPress-Tab>', salvar)
         editorCelula.bind('<FocusOut>', lambda e: editorCelula.destroy())
         
         return editorCelula
+    
+    def deletarLinha(self, e):
+        try:
+            item = self.tabela.selection()[0]
+            self.tabela.delete(item)
+        except:
+            messagebox.showerror("Erro", "Não há linha aqui") 
 
     def onSelectCheckBoxPrimeiroGrau(self):
         if self.variavelPrimeiroGrau.get() == 1:
@@ -111,7 +120,10 @@ class App:
         x = xs.astype(float)
         ys = np.array(valores["Y"])
         y = ys.astype(float)
-        print(x)
+        
+        if len(x) == 0 or len(y) == 0:
+            messagebox.showerror("Erro", "Tabela vazia")
+            return;
 
         print(valores)
         if self.variavelPrimeiroGrau.get() == 1:
@@ -136,7 +148,7 @@ class App:
             coeficientes_poly = np.polyfit(x, y, 2)  # Regressão polinomial de grau 2
             modelo_poly = np.poly1d(coeficientes_poly)
             # Pontos para a linha de ajuste
-            x_linha = np.linspace(min(x), max(x), 100)
+            x_linha = np.linspace(-100, 100, 100)
             y_poly = modelo_poly(x_linha)
             # Plotagem dos dados e das linhas de ajuste
             plt.figure(figsize=(10, 5))
@@ -149,7 +161,7 @@ class App:
             plt.grid(True)
             plt.show()
         else:
-            messagebox.showerror("Erro box", "Nenhuma box selecionada!")
+            messagebox.showerror("Erro", "Nenhuma opção selecionada!")
 
             
 
